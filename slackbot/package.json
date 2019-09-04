@@ -6,6 +6,10 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@slack/web-api": "^5.1.0"
+    "@slack/web-api": "^5.1.0",
+    "dotenv": "^8.1.0"
+  },
+  "scripts": {
+    "start": "node bot.js"
   }
 }
