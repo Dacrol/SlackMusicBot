@@ -1,7 +1,7 @@
 const decoder = require('lame').Decoder
 const Speaker = require('speaker')
 const ytdl = require('ytdl-core')
-const ffmpeg = require('fluent-ffmpeg');
+const ffmpeg = require('fluent-ffmpeg')
 
 // @ts-ignore
 const speaker = new Speaker({
@@ -10,14 +10,37 @@ const speaker = new Speaker({
   sampleRate: 44100
 })
 
-let url = 'https://www.youtube.com/watch?v=vv2DSmy3Tro'
+class Player {
+  play(url) {
+    return new Promise(async (resolve, reject) => {
+      if (
+        !(
+          typeof url === 'string' &&
+          ['https://www.youtube.com/', 'http://www.youtube.com/', 'youtube.com/'].some(validUrl => {
+            return url.startsWith(validUrl)
+          })
+        )
+      ) {
+        return
+      }
+      try {
+        const stream = ytdl(url, {
+          highWaterMark: 2 ** 25,
+          quality: 'highestaudio',
+          filter: 'audioonly'
+        })
 
-const stream = ytdl(url, {
-  highWaterMark: 2 ** 25,
-  quality: 'highestaudio',
-  filter: 'audioonly'
-})
+        const audio = ffmpeg(stream).format('mp3')
+        // @ts-ignore
+        const playing = audio.pipe(decoder()).pipe(speaker)
+        playing.on('close', () => {
+          resolve()
+        })
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+}
 
-const audio = ffmpeg(stream).format('mp3')
-// @ts-ignore
-audio.pipe(decoder()).pipe(speaker)
+module.exports = Player
