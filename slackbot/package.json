@@ -3,10 +3,9 @@
   "version": "0.0.0",
   "main": "bot.js",
   "author": "Dacrol",
-  "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@slack/web-api": "^5.1.0",
+    "@slack/rtm-api": "^5.0.2",
     "dotenv": "^8.1.0"
   },
   "scripts": {

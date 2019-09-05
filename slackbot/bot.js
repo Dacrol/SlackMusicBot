@@ -1,18 +1,21 @@
-const { WebClient } = require('@slack/web-api')
 require('dotenv').config()
+const { RTMClient } = require('@slack/rtm-api');
 
-// An access token (from your Slack app or custom integration - xoxp, xoxb)
-const token = process.env.SLACK_TOKEN
+const token = process.env.SLACK_BOT_TOKEN;
 
-const web = new WebClient(token)
+const rtm = new RTMClient(token);
 
-// This argument can be a channel ID, a DM ID, a MPDM ID, or a group ID
-const conversationId = 'CN2PDSDQF'
-;
+rtm.on('message', async (event) => {
+  if (event.subtype || !(event.channel.startsWith('C'))) return
+  console.log(event);
+  const reply = await rtm.sendMessage(`Ayyy, <@${event.user}>`, event.channel)
+});
+
 (async () => {
-  // See: https://api.slack.com/methods/chat.postMessage
-  const res = await web.chat.postMessage({ channel: conversationId, text: 'Hello there' })
-
-  // `res` contains information about the posted message
-  console.log('Message sent: ', res.ts)
-})()
+  // Connect to Slack
+  const { self, team } = await rtm.start();
+  console.log('Connected!')
+  setTimeout(() => {
+    console.log(self, team)
+  }, 10000);
+})();
