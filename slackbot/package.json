@@ -10,6 +10,11 @@
     "dotenv": "^8.1.0"
   },
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "dev": "nodemon --config nodemon.json --exec \"npm run debug\"",
+    "debug": "node --inspect=9229 bot.js"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.2"
   }
 }
