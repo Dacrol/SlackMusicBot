@@ -6,12 +6,17 @@
   "private": true,
   "dependencies": {
     "@slack/rtm-api": "^5.0.2",
-    "dotenv": "^8.1.0"
+    "dotenv": "^8.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "lame": "^1.2.4",
+    "speaker": "^0.4.2",
+    "ytdl-core": "^0.29.6"
   },
   "scripts": {
-    "start": "node bot.js",
+    "start": "node slackbot/bot.js",
     "dev": "nodemon --config nodemon.json --exec \"npm run debug\"",
-    "debug": "node --inspect=9229 bot.js"
+    "debug": "node --inspect=9229 slackbot/bot.js",
+    "play": "node player/player.js"
   },
   "devDependencies": {
     "nodemon": "^1.19.2"
