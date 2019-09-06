@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "start": "node player.js",
-    "dev": "node player.js"
+    "dev": "node player.js",
+    "play": "node player.js"
   },
   "dependencies": {
     "fluent-ffmpeg": "^2.1.2",

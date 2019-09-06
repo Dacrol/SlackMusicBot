@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+
+  player:
+    build: './player'
+    user: 'node'
+    working_dir: /home/node/app
+    volumes:
+      - ./player:/home/node/app
+    devices:
+      - /dev/snd/:/dev/snd/
+    ports:
+      - '13001:13001'
+    command: 'bash -c "npm i && npm rebuild && npm run play https://www.youtube.com/watch?v=9p_QW_HsKPI"'
+    restart: 'unless-stopped'

@@ -44,3 +44,13 @@ class Player {
 }
 
 module.exports = Player
+
+if (process.argv[2]) {
+  const player= new Player()
+  player.play(process.argv[2]).then(() => {
+    console.log('Audio played successfully')
+    setTimeout(() => {
+      process.exit(0)
+    }, 1000);
+  })
+}
