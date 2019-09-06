@@ -3,13 +3,6 @@ const Speaker = require('speaker')
 const ytdl = require('ytdl-core')
 const ffmpeg = require('fluent-ffmpeg')
 
-// @ts-ignore
-const speaker = new Speaker({
-  channels: 2,
-  bitDepth: 16,
-  sampleRate: 44100
-})
-
 class Player {
   play(url) {
     return new Promise(async (resolve, reject) => {
@@ -31,9 +24,18 @@ class Player {
         })
 
         const audio = ffmpeg(stream).format('mp3')
+
+        // @ts-ignore
+        const speaker = new Speaker({
+          channels: 2,
+          bitDepth: 16,
+          sampleRate: 44100
+        })
+
         // @ts-ignore
         const playing = audio.pipe(decoder()).pipe(speaker)
         playing.on('close', () => {
+          console.log('Audio played successfully')
           resolve()
         })
       } catch (error) {
