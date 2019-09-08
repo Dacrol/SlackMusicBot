@@ -48,7 +48,7 @@ function handleCommand(message, { event = {} } = {}) {
  */
 function testCommand(command, validCommands) {
   return validCommands.some(valid => {
-    return valid === command
+    return valid === command.toLowerCase()
   })
 }
 

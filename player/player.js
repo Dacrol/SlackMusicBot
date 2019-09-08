@@ -4,21 +4,24 @@ const Speaker = require('speaker')
 const ytdl = require('ytdl-core')
 const ffmpeg = require('fluent-ffmpeg')
 const Volume = require('pcm-volume')
-const volume = new Volume()
 
 class Player {
   constructor() {
     this.queued = []
+    this.isPlaying = false
+    this.currentVolume = 1
+    this.volumeTransform = null
   }
 
   set volume(vol) {
     if (vol > 100) {
       vol = 100
     }
-    if (vol > 1) {
-      vol = vol / 100
+    vol = vol / 100
+    this.currentVolume = vol
+    if (this.volumeTransform) {
+      this.volumeTransform.setVolume(vol)
     }
-    volume.setVolume(vol)
   }
 
   play(url) {
@@ -35,13 +38,15 @@ class Player {
         })
 
         const audio = ffmpeg(stream).format('mp3')
-        let time
+
         // @ts-ignore
         const speaker = new Speaker({
           channels: 2,
           bitDepth: 16,
           sampleRate: 48000
         })
+
+        this.volumeTransform = new Volume(this.currentVolume)
 
         const playing = audio
           .pipe(
@@ -53,7 +58,7 @@ class Player {
               mode: lame.STEREO
             })
           )
-          .pipe(volume)
+          .pipe(this.volumeTransform)
           .pipe(speaker)
         playing.on('close', () => {
           console.log('Audio played successfully')
@@ -70,7 +75,9 @@ class Player {
       throw new Error('Not a valid YouTube ID/URL')
     }
     this.queued.push(url)
-    this.playQueue()
+    if (!this.isPlaying) {
+      this.playQueue()
+    }
   }
 
   playNext() {
@@ -79,8 +86,10 @@ class Player {
 
   async playQueue() {
     while (this.queued.length > 0) {
+      this.isPlaying = true
       await this.playNext()
     }
+    this.isPlaying = false
   }
 
   static isYoutube(string) {
