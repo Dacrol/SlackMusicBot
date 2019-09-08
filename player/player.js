@@ -9,7 +9,7 @@ class Player {
       if (
         !(
           typeof url === 'string' &&
-          ['https://www.youtube.com/', 'http://www.youtube.com/', 'youtube.com/'].some(validUrl => {
+          ['https://www.youtube.com/', 'http://www.youtube.com/', 'youtube.com/', 'http://youtube.com/', 'https://youtube.com/'].some(validUrl => {
             return url.startsWith(validUrl)
           })
         )
