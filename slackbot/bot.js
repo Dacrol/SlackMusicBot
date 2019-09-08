@@ -7,25 +7,51 @@ const token = process.env.SLACK_BOT_TOKEN
 
 const rtm = new RTMClient(token)
 
-const urlRegex = /<(.+)>/
-
 rtm.on('message', async event => {
   if (event.subtype || !event.channel.startsWith('C')) {
     return
   }
   console.log(event)
-  const reply = await rtm.sendMessage(`Ayyy, <@${event.user}>`, event.channel)
-  const url = urlRegex.exec(event.text)
-  console.log(url)
-  if (!Array.isArray(url) || typeof url[1] !== 'string') {
-    return
-  }
-  try {
-    await player.play(url[1])
-  } catch (error) {
-    console.warn(error)
+  const message = event.text
+  if (Player.isYoutubeUrl(message)) {
+    try {
+      player.queue(message)
+      const reply = await rtm.sendMessage(
+        `Song queued, <@${event.user}>`,
+        event.channel
+      )
+    } catch (error) {
+      console.warn(error)
+    }
+  } else {
+    handleCommand(message, { event: event })
   }
 })
+
+function handleCommand(message, { event = {} } = {}) {
+  let [command, args] = message.split(/\s(.+)/)
+  if (!(command && args)) {
+    return
+  }
+
+  if (
+    testCommand(command, ['vol', 'volume']) &&
+    (args.trim() !== '' && isFinite(+args))
+  ) {
+    player.volume = args
+  }
+}
+
+/**
+ * @param {string} command
+ * @param {Array} validCommands
+ */
+function testCommand(command, validCommands) {
+  return validCommands.some(valid => {
+    return valid === command
+  })
+}
+
 ;(async () => {
   // Connect to Slack
   const { self, team } = await rtm.start()
