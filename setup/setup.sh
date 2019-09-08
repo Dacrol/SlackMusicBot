@@ -5,6 +5,7 @@ sudo apt-get install ffmpeg libasound2-dev libasound2 alsa-utils alsa-oss mkchro
 # sudo bash -c 'echo "snd-aloop" >> /etc/modules'
 bash -c 'echo "set-default-sink Mkchromecast" >> /etc/pulse/default.pa'
 pacmd set-default-sink Mkchromecast
+cp startup /etc/init.d/startup
 
 # mkchromecast --encoder-backend ffmpeg -c aac --control
 # mkchromecast -c aac --control
