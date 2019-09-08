@@ -4,6 +4,13 @@ const ytdl = require('ytdl-core')
 const ffmpeg = require('fluent-ffmpeg')
 
 class Player {
+  constructor() {
+    this.playQueue = []
+  }
+
+  set volume(vol) {
+  }
+
   play(url) {
     return new Promise(async (resolve, reject) => {
       if (
@@ -18,7 +25,7 @@ class Player {
       }
       try {
         const stream = ytdl(url, {
-          highWaterMark: 2 ** 25,
+          // highWaterMark: 2 ** 25,
           quality: 'highestaudio',
           filter: 'audioonly'
         })
@@ -43,10 +50,20 @@ class Player {
       }
     })
   }
+
+  queue(url) {
+    this.playQueue.push(url)
+    if (this.playQueue.length === 1) {
+      this.playNext()
+    }
+  }
+
+  playNext() {
+    this.play(this.playQueue.pop())
+  }
 }
 
 module.exports = Player
-
 if (process.argv[2]) {
   const player= new Player()
   player.play(process.argv[2]).then(() => {
