@@ -9,6 +9,7 @@
     "dotenv": "^8.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "lame": "^1.2.4",
+    "pcm-volume": "^1.0.0",
     "speaker": "^0.4.2",
     "ytdl-core": "^0.29.6"
   },
