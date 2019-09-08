@@ -8,7 +8,7 @@ const volume = new Volume()
 
 class Player {
   constructor() {
-    this.playQueue = []
+    this.queued = []
   }
 
   set volume(vol) {
@@ -23,7 +23,7 @@ class Player {
 
   play(url) {
     return new Promise(async (resolve, reject) => {
-      if (!Player.isYoutubeUrl(url)) {
+      if (!Player.isYoutube(url)) {
         reject(new Error('Not a valid YouTube ID/URL'))
         return
       }
@@ -66,21 +66,25 @@ class Player {
   }
 
   queue(url) {
-    if (!Player.isYoutubeUrl(url)) {
+    if (!Player.isYoutube(url)) {
       throw new Error('Not a valid YouTube ID/URL')
     }
-    this.playQueue.push(url)
-    if (this.playQueue.length === 1) {
-      this.playNext()
-    }
+    this.queued.push(url)
+    this.playQueue()
   }
 
   playNext() {
-    this.play(this.playQueue.pop())
+    return this.play(this.queued.pop())
   }
 
-  static isYoutubeUrl(url) {
-    return ytdl.validateURL(url)
+  async playQueue() {
+    while (this.queued.length > 0) {
+      await this.playNext()
+    }
+  }
+
+  static isYoutube(string) {
+    return ytdl.validateURL(string) || ytdl.validateID(string)
   }
 }
 

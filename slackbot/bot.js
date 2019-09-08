@@ -13,7 +13,7 @@ rtm.on('message', async event => {
   }
   console.log(event)
   const message = event.text
-  if (Player.isYoutubeUrl(message)) {
+  if (Player.isYoutube(message)) {
     try {
       player.queue(message)
       const reply = await rtm.sendMessage(
