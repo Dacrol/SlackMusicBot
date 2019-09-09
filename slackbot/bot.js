@@ -8,10 +8,11 @@ const token = process.env.SLACK_BOT_TOKEN
 const rtm = new RTMClient(token)
 
 rtm.on('message', async event => {
-  if (event.subtype || !event.channel.startsWith('C')) {
+  console.log(event)
+  if (event.subtype || !(event.channel.startsWith('C') || event.channel.startsWith('D'))) {
+    console.log('Invalid channel')
     return
   }
-  console.log(event)
   const message = event.text
   if (Player.isYoutube(message)) {
     try {
