@@ -14,3 +14,4 @@
 * Run Mkchromecast as a child process
 * Finish Dockerizing
 * User playlists 
+* Show current queue, volume, etc

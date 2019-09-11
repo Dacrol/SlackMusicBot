@@ -31,7 +31,19 @@ rtm.on('message', async event => {
 
 function handleCommand(message, { event = {} } = {}) {
   let [command, args] = message.split(/\s(.+)/)
-  if (!(command && args)) {
+  if (!command) {
+    return
+  }
+
+  if (testCommand(command, ['skip'])) {
+    rtm.sendMessage(
+      `Track skipped`,
+      event.channel
+    )
+    player.skip()
+  }
+  
+  if (!args) {
     return
   }
 
@@ -40,6 +52,10 @@ function handleCommand(message, { event = {} } = {}) {
     (args.trim() !== '' && isFinite(+args))
   ) {
     player.volume = args
+    rtm.sendMessage(
+      `Volume set`,
+      event.channel
+    )
   }
 }
 

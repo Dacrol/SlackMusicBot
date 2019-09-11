@@ -11,6 +11,9 @@ class Player {
     this.isPlaying = false
     this.currentVolume = 1
     this.volumeTransform = null
+    this.currentlyPlaying = null
+    this.currentAudio = null
+    this.currentStream = null
   }
 
   set volume(vol) {
@@ -37,8 +40,13 @@ class Player {
           filter: 'audioonly'
         })
 
-        const audio = ffmpeg(stream).format('mp3')
+        this.currentStream = stream
 
+        const audio = ffmpeg(stream).format('mp3')
+        audio.on('error', (error) => {
+          console.warn(error)
+        })
+        this.currentAudio = audio
         // @ts-ignore
         const speaker = new Speaker({
           channels: 2,
@@ -60,6 +68,7 @@ class Player {
           )
           .pipe(this.volumeTransform)
           .pipe(speaker)
+        this.currentlyPlaying = playing
         playing.on('close', () => {
           console.log('Audio played successfully')
           resolve()
@@ -76,8 +85,16 @@ class Player {
     }
     this.queued.push(url)
     if (!this.isPlaying) {
-      this.playQueue()
+      this.playQueue().catch(error => {
+        console.error(error)
+      })
     }
+  }
+
+  skip() {
+    this.currentAudio.kill('SIGKILL')
+    this.currentlyPlaying.destroy()
+    this.currentStream.destroy()
   }
 
   playNext() {
