@@ -34,6 +34,7 @@ class Player {
         return
       }
       try {
+        let streamError = null
         const stream = ytdl(url, {
           highWaterMark: 2 ** 25,
           quality: 'highestaudio',
@@ -44,7 +45,8 @@ class Player {
 
         const audio = ffmpeg(stream).format('mp3')
         audio.on('error', (error) => {
-          console.warn(error)
+          streamError = error
+          reject(error)
         })
         this.currentAudio = audio
         // @ts-ignore
@@ -70,6 +72,7 @@ class Player {
           .pipe(speaker)
         this.currentlyPlaying = playing
         playing.on('close', () => {
+          if (streamError) return
           console.log('Audio played successfully')
           resolve()
         })
