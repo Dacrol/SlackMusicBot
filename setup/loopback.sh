@@ -9,3 +9,13 @@ pacat -r -d alsa_input.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00
 
 # OR: 
 # pactl unload-module module-loopback
+
+
+
+# Create noise.prof:
+
+# pacat -r -d alsa_input.usb-C-Media_Electronics_Inc._USB_Advanced_Audio_Device-00.analog-stereo --latency=1msec | sox -b 16 -c 2 -e signed -t raw -r 44100 - -b 16 -c 2 -e signed -r 44100 -t wav noise.wav
+
+# Let it record for 10 seconds then CTRL+C then:
+
+# sox noise.wav -n noiseprof noise.prof
