@@ -17,6 +17,7 @@ class Player {
     this.currentAudio = null
     this.currentStream = null
     this.autoplay = false
+    this.events = {}
   }
 
   set volume(vol) {
@@ -30,12 +31,14 @@ class Player {
     }
   }
 
-  play(url) {
+  play(next) {
     return new Promise(async (resolve, reject) => {
+      const url = next.url
       if (!Player.isYoutube(url)) {
         reject(new Error('Not a valid YouTube ID/URL'))
         return
       }
+      let info = {}
       try {
         let streamError = null
         const stream = ytdl(url, {
@@ -44,10 +47,10 @@ class Player {
           filter: 'audioonly'
         })
 
-        let info = {}
 
         stream.on('info', (_info, format) => {
           info = _info
+          this.fire('play', [next.event, info.title])
         })
 
         this.currentStream = stream
@@ -55,7 +58,7 @@ class Player {
         const audio = ffmpeg(stream).format('mp3')
         audio.on('error', (error) => {
           streamError = error
-          reject(error)
+          reject({error: error, url: url, info: info, queueItem: next})
         })
         this.currentAudio = audio
         // @ts-ignore
@@ -83,19 +86,35 @@ class Player {
         playing.on('close', () => {
           if (streamError) return
           console.log('Audio played successfully')
-          resolve({url: url, info: info})
+          resolve({url: url, info: info, queueItem: next})
         })
       } catch (error) {
-        reject(error)
+        reject({error: error, url: url, info: info, queueItem: next})
       }
     })
   }
 
-  queue(url) {
+  on(event, callback) {
+    if (!this.events[event]) {
+      this.events[event] = []
+    }
+    this.events[event].push(callback)
+  }
+
+  fire(event, args) {
+    if (!Array.isArray(this.events[event])) {
+      return
+    }
+    this.events[event].forEach(eventFunction => {
+      eventFunction.apply(this, args)
+    })
+  }
+
+  queue(url, event) {
     if (!Player.isYoutube(url)) {
       throw new Error('Not a valid YouTube ID/URL')
     }
-    this.queued.push(url)
+    this.queued.push({url: url, event: event})
     if (!this.isPlaying) {
       this.playQueue().catch(error => {
         console.error(error)
@@ -110,15 +129,15 @@ class Player {
   }
 
   playNext() {
-    const url = this.queued.pop()
-    return this.play(url)
-  }
-
-  async autoPlayNextTrack(url) {
+    const next = this.queued.pop()
+    return this.play(next)
   }
 
   async getAutoplayTrack(info) {
     try {
+      if (!(info && info.player_response && info.player_response.endscreen)) {
+        throw new Error('No info.player_response.endscreen')
+      }
       const endscreenUrl = 'https:' +  info.player_response.endscreen.endscreenUrlRenderer.url
       let {data: endscreenInfo} = await axios.get(endscreenUrl)
       if (endscreenInfo.startsWith(')]}')) {
@@ -134,10 +153,9 @@ class Player {
       if (nextID.startsWith('/watch?v=')) {
         nextID = nextID.replace('/watch?v=', '')
       }
-      console.log(nextID, info.video_url)
-      return nextID
+      return {id: nextID, title: nextVideo.endscreenElementRenderer.title.simpleText}
     } catch (error) {
-      console.trace('Error while looking up next video to autoplay')
+      console.error('Error while looking up next video to autoplay', error)
       throw error
     }
   }
@@ -146,14 +164,24 @@ class Player {
     while (this.queued.length > 0) {
       this.isPlaying = true
       const playedTrack = await this.playNext().catch((error) => {
-        console.trace('Error while playing next, or track was skipped', error)
+        console.error('Error while playing next, or track was skipped', error.error)
+        return error
       })
       if (this.queued.length === 0 && this.autoplay) {
         try {
-          const nextTrack = await this.getAutoplayTrack(playedTrack.info)
-          this.queue(nextTrack)
+          let info = playedTrack.info
+          if (!(info && info.player_response && info.player_response.endscreen)) {
+            try {
+              info = await ytdl.getInfo(playedTrack.url)
+            } catch (error) {
+              console.error(error)
+            }
+          }
+          const nextTrack = await this.getAutoplayTrack(info)
+          this.queue(nextTrack.id, playedTrack.queueItem.event)
+          console.log('Queued: ' + nextTrack.title)
         } catch (error) {
-          console.warn('Video had no next video to autoplay')
+          console.warn('Video had no next video to autoplay', error)
         }
       }
     }

@@ -7,6 +7,16 @@ const token = process.env.SLACK_BOT_TOKEN
 
 const rtm = new RTMClient(token)
 
+player.on('play', (event, title) => {
+  if (event && event.channel && title) {
+      rtm.sendMessage(
+        `Now playing: ${title}`,
+        event.channel
+      )
+    }
+  }
+)
+
 rtm.on('message', async event => {
   console.log(event)
   if (event.subtype || !(event.channel.startsWith('C') || event.channel.startsWith('D'))) {
@@ -16,7 +26,7 @@ rtm.on('message', async event => {
   const message = event.text
   if (Player.isYoutube(message)) {
     try {
-      player.queue(message)
+      player.queue(message, event)
       const reply = await rtm.sendMessage(
         `Song queued, <@${event.user}>`,
         event.channel
@@ -36,6 +46,9 @@ function handleCommand(message, { event = {} } = {}) {
   }
 
   if (testCommand(command, ['skip'])) {
+    if (!player.isPlaying) {
+      return
+    }
     rtm.sendMessage(
       `Track skipped`,
       event.channel
