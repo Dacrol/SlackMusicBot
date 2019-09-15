@@ -102,6 +102,30 @@ class Player {
 
   playNext() {
     return this.play(this.queued.pop())
+
+  async getAutoplayTrack(info) {
+    try {
+      const endscreenUrl = 'https:' +  info.player_response.endscreen.endscreenUrlRenderer.url
+      let {data: endscreenInfo} = await axios.get(endscreenUrl)
+      if (endscreenInfo.startsWith(')]}')) {
+        endscreenInfo = endscreenInfo.replace(/^\)\]\}/, '')
+        endscreenInfo = JSON.parse(endscreenInfo)
+      }
+      const nextVideo = endscreenInfo.elements.find((element) => {
+        if (element.endscreenElementRenderer.style.toLowerCase() === 'video') {
+          return true
+        }
+      })
+      let nextID = nextVideo.endscreenElementRenderer.endpoint.urlEndpoint.url
+      if (nextID.startsWith('/watch?v=')) {
+        nextID = nextID.replace('/watch?v=', '')
+      }
+      console.log(nextID, info.video_url)
+      return nextID
+    } catch (error) {
+      console.trace('Error while looking up next video to autoplay: ', error)
+      return null
+    }
   }
 
   async playQueue() {
