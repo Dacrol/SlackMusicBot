@@ -42,7 +42,18 @@ function handleCommand(message, { event = {} } = {}) {
     )
     player.skip()
   }
+
+
+  if (testCommand(command, ['autoplay'])) {
+    const autoplay = player.toggleAutoplay(args)
+    rtm.sendMessage(
+      `Autoplay ${autoplay ? 'enabled' : 'disabled'}`,
+      event.channel
+    )
+  }
   
+  /* Put commands that require args below */
+
   if (!args) {
     return
   }
@@ -64,6 +75,9 @@ function handleCommand(message, { event = {} } = {}) {
  * @param {Array} validCommands
  */
 function testCommand(command, validCommands) {
+  if (typeof validCommands === 'string') {
+    validCommands = [validCommands]
+  }
   return validCommands.some(valid => {
     return valid === command.toLowerCase()
   })

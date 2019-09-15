@@ -4,6 +4,8 @@ const Speaker = require('speaker')
 const ytdl = require('ytdl-core')
 const ffmpeg = require('fluent-ffmpeg')
 const Volume = require('pcm-volume')
+const { getInfo } = require('ytdl-getinfo')
+const axios = require('axios').default
 
 class Player {
   constructor() {
@@ -14,6 +16,7 @@ class Player {
     this.currentlyPlaying = null
     this.currentAudio = null
     this.currentStream = null
+    this.autoplay = false
   }
 
   set volume(vol) {
@@ -39,6 +42,12 @@ class Player {
           highWaterMark: 2 ** 25,
           quality: 'highestaudio',
           filter: 'audioonly'
+        })
+
+        let info = {}
+
+        stream.on('info', (_info, format) => {
+          info = _info
         })
 
         this.currentStream = stream
@@ -74,7 +83,7 @@ class Player {
         playing.on('close', () => {
           if (streamError) return
           console.log('Audio played successfully')
-          resolve()
+          resolve({url: url, info: info})
         })
       } catch (error) {
         reject(error)
@@ -101,7 +110,12 @@ class Player {
   }
 
   playNext() {
-    return this.play(this.queued.pop())
+    const url = this.queued.pop()
+    return this.play(url)
+  }
+
+  async autoPlayNextTrack(url) {
+  }
 
   async getAutoplayTrack(info) {
     try {
@@ -123,8 +137,8 @@ class Player {
       console.log(nextID, info.video_url)
       return nextID
     } catch (error) {
-      console.trace('Error while looking up next video to autoplay: ', error)
-      return null
+      console.trace('Error while looking up next video to autoplay')
+      throw error
     }
   }
 
@@ -134,8 +148,29 @@ class Player {
       const playedTrack = await this.playNext().catch((error) => {
         console.trace('Error while playing next, or track was skipped', error)
       })
+      if (this.queued.length === 1 && this.autoplay) {
+        try {
+          const nextTrack = await this.getAutoplayTrack(playedTrack.info)
+          this.queue(nextTrack)
+        } catch (error) {
+          console.warn('Video had no next video to autoplay')
+        }
+      }
     }
     this.isPlaying = false
+  }
+
+  toggleAutoplay(value) {
+    if (!value) {
+      this.autoplay = !this.autoplay
+    }
+    else if (['1', 'on', 'enable', 'enabled'].some(str => value === str)) {
+      this.autoplay = true
+    }
+    else if (['0', 'off', 'disable', 'disabled'].some(str => value === str)) {
+      this.autoplay = false
+    }
+    return this.autoplay
   }
 
   static isYoutube(string) {
