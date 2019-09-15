@@ -107,7 +107,9 @@ class Player {
   async playQueue() {
     while (this.queued.length > 0) {
       this.isPlaying = true
-      await this.playNext()
+      const playedTrack = await this.playNext().catch((error) => {
+        console.trace('Error while playing next, or track was skipped', error)
+      })
     }
     this.isPlaying = false
   }
