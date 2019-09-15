@@ -148,7 +148,7 @@ class Player {
       const playedTrack = await this.playNext().catch((error) => {
         console.trace('Error while playing next, or track was skipped', error)
       })
-      if (this.queued.length === 1 && this.autoplay) {
+      if (this.queued.length === 0 && this.autoplay) {
         try {
           const nextTrack = await this.getAutoplayTrack(playedTrack.info)
           this.queue(nextTrack)
