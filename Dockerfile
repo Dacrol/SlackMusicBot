@@ -4,7 +4,7 @@ FROM node:10.16-stretch
 
 RUN apt-get update -y
 # RUN apt-get install libasound2-dev ffmpeg -y
-RUN apt-get install -y ffmpeg libasound2-dev libasound2 alsa-utils alsa-oss mkchromecast vim mkchromecast-pulseaudio
+RUN apt-get install -y ffmpeg libasound2-dev libasound2 alsa-utils alsa-oss mkchromecast vim mkchromecast-pulseaudio pulseaudio
 
 # RUN bash -c 'echo "set-default-sink Mkchromecast" >> /etc/pulse/default.pa'
 
