@@ -177,7 +177,9 @@ class Player {
               console.error(error)
             }
           }
-          const nextTrack = await this.getAutoplayTrack(info)
+          const nextTrack = await this.getAutoplayTrack(info).catch(error => {
+            return {id: info.related_videos[0].id, title: info.related_videos[0].title}
+          })
           this.queue(nextTrack.id, playedTrack.queueItem.event)
           console.log('Queued: ' + nextTrack.title)
         } catch (error) {
