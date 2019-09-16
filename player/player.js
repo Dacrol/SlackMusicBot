@@ -188,6 +188,13 @@ class Player {
     this.isPlaying = false
   }
 
+  stop() {
+    this.queued = []
+    if (this.isPlaying) {
+      this.skip()
+    }
+  }
+
   toggleAutoplay(value) {
     if (!value) {
       this.autoplay = !this.autoplay

@@ -45,6 +45,10 @@ function handleCommand(message, { event = {} } = {}) {
     return
   }
 
+  if (testCommand(command, ['stop', 'stfu'])) {
+    player.stop()
+  }
+
   if (testCommand(command, ['skip'])) {
     if (!player.isPlaying) {
       return
