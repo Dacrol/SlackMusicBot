@@ -129,7 +129,7 @@ class Player {
   }
 
   playNext() {
-    const next = this.queued.pop()
+    const next = this.queued.shift()
     return this.play(next)
   }
 
