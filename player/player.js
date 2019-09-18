@@ -18,6 +18,7 @@ class Player {
     this.currentStream = null
     this.autoplay = false
     this.events = {}
+    this.history = []
   }
 
   set volume(vol) {
@@ -130,7 +131,13 @@ class Player {
 
   playNext() {
     const next = this.queued.shift()
-    return this.play(next)
+    return this.play(next).finally(() => {
+      this.addToHistory(next)
+    })
+  }
+
+  addToHistory(track) {
+    this.history.push(track)
   }
 
   async getAutoplayTrack(info) {
