@@ -56,7 +56,9 @@ class Player {
 
         this.currentStream = stream
 
-        const audio = ffmpeg(stream).format('mp3')
+        const audio = ffmpeg(stream).format('mp3').inputOptions([
+          '-af asetrate=48000'
+        ])
         audio.on('error', (error) => {
           streamError = error
           reject({error: error, url: url, info: info, queueItem: next})
