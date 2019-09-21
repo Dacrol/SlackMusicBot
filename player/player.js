@@ -76,6 +76,7 @@ class Player {
 
           audio.on('error', error => {
             streamError = error
+            // @ts-ignore
             console.log(`Audio played for ${~~(this.stopwatch.stop() / 1000)} seconds`)
             speaker.close(true)
             reject({ error: error, url: url, info: info, queueItem: next })
