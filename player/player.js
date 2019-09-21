@@ -6,6 +6,7 @@ const ffmpeg = require('fluent-ffmpeg')
 const Volume = require('pcm-volume')
 const { getInfo } = require('ytdl-getinfo')
 const axios = require('axios').default
+const Stopwatch = require('@dacrol/stopwatch')
 
 class Player {
   constructor() {
@@ -19,7 +20,7 @@ class Player {
     this.autoplay = false
     this.events = {}
     this.history = []
-    this.ffmpegOutputOptions = ['-af aresample=48000', '-ac 2']
+    this.stopwatch = new Stopwatch()
   }
 
   set volume(vol) {
@@ -57,7 +58,8 @@ class Player {
 
           const audio = ffmpeg(stream)
             .format('mp3')
-            .outputOptions(this.ffmpegOutputOptions)
+            // @ts-ignore
+            .outputOptions(this.ffmpegOutputOptions || [])
           audio.on('error', error => {
             streamError = error
             reject({ error: error, url: url, info: info, queueItem: next })
@@ -85,9 +87,13 @@ class Player {
             .pipe(this.volumeTransform)
             .pipe(speaker)
           this.currentlyPlaying = playing
+          playing.on('open', () => {
+            this.stopwatch.start()
+          })
           playing.on('close', () => {
             if (streamError) return
-            console.log('Audio played successfully')
+            // @ts-ignore
+            console.log(`Audio played successfully for ${~~(this.stopwatch.stop() / 1000)} seconds`)
             resolve({ url: url, info: info, queueItem: next })
           })
         })
