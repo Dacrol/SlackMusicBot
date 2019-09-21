@@ -9,7 +9,7 @@
   ],
   "verbose": true,
   "ext": "js json",
-  "delay": "500",
+  "delay": "1000",
   "runOnChangeOnly": false,
   "exitcrash": false
 }

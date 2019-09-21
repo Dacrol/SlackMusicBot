@@ -7,6 +7,7 @@ const Volume = require('pcm-volume')
 const { getInfo } = require('ytdl-getinfo')
 const axios = require('axios').default
 const Stopwatch = require('@dacrol/stopwatch')
+const VideoServer = require('./video-server')
 
 class Player {
   constructor() {
@@ -22,6 +23,9 @@ class Player {
     this.history = []
     this.stopwatch = new Stopwatch()
     this.trackWasSkipped = false
+    const {server, relay} = VideoServer()
+    this.server = server
+    this.relay = relay
   }
 
   set volume(vol) {
