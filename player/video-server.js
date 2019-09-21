@@ -11,9 +11,13 @@ module.exports = function() {
     console.log('Video stream open on port 9999')
   })
 
-  const relay = child_process.fork(__dirname + '/websocket-relay.js', ['falloutbotinput 9997 9998'], {
+  const relay = child_process.fork(__dirname + '/websocket-relay.js', [
+    'falloutbotinput', 
+    '9997',
+    '9998'], {
     detached: false,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    execArgv: ['--inspect=9230']
   })
 
   return {server: app, relay: relay}
