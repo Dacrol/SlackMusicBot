@@ -22,3 +22,8 @@ module.exports = function() {
 
   return {server: app, relay: relay}
 }
+
+/* 
+Send stream example:
+ffmpeg -re -i dancemacabre.webm -f mpegts -codec:v mpeg1video -s 1920x1080 -b:v 7500k -bf 0 -codec:a mp2 -q 1 -muxdelay 0.001 http://localhost:9997/falloutbotinput
+*/
