@@ -126,7 +126,7 @@ class Player {
   }
 
   skip() {
-    this.currentAudio.kill('SIGKILL')
+    this.currentAudio.kill('SIGTERM')
     this.currentlyPlaying.destroy()
     this.currentStream.destroy()
   }
