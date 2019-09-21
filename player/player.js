@@ -52,46 +52,45 @@ class Player {
           filter: 'audioonly'
         })
 
-
         stream.on('info', (_info, format) => {
           info = _info
           this.fire('play', [next.event, info.title])
-        })
 
-        this.currentStream = stream
+          this.currentStream = stream
 
-        const audio = ffmpeg(stream).format('mp3').outputOptions(this.ffmpegOutputOptions)
-        audio.on('error', (error) => {
-          streamError = error
-          reject({error: error, url: url, info: info, queueItem: next})
-        })
-        this.currentAudio = audio
-        // @ts-ignore
-        const speaker = new Speaker({
-          channels: 2,
-          bitDepth: 16,
-          sampleRate: 48000
-        })
-
-        this.volumeTransform = new Volume(this.currentVolume)
-
-        const playing = audio
-          .pipe(
-            // @ts-ignore
-            new Decoder({
-              channels: 2,
-              bitDepth: 16,
-              sampleRate: 48000,
-              mode: lame.STEREO
-            })
-          )
-          .pipe(this.volumeTransform)
-          .pipe(speaker)
-        this.currentlyPlaying = playing
-        playing.on('close', () => {
-          if (streamError) return
-          console.log('Audio played successfully')
-          resolve({url: url, info: info, queueItem: next})
+          const audio = ffmpeg(stream).format('mp3').outputOptions(this.ffmpegOutputOptions)
+          audio.on('error', (error) => {
+            streamError = error
+            reject({error: error, url: url, info: info, queueItem: next})
+          })
+          this.currentAudio = audio
+          // @ts-ignore
+          const speaker = new Speaker({
+            channels: 2,
+            bitDepth: 16,
+            sampleRate: 48000
+          })
+  
+          this.volumeTransform = new Volume(this.currentVolume)
+  
+          const playing = audio
+            .pipe(
+              // @ts-ignore
+              new Decoder({
+                channels: 2,
+                bitDepth: 16,
+                sampleRate: 48000,
+                mode: lame.STEREO
+              })
+            )
+            .pipe(this.volumeTransform)
+            .pipe(speaker)
+          this.currentlyPlaying = playing
+          playing.on('close', () => {
+            if (streamError) return
+            console.log('Audio played successfully')
+            resolve({url: url, info: info, queueItem: next})
+          })
         })
       } catch (error) {
         reject({error: error, url: url, info: info, queueItem: next})
