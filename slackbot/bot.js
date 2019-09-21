@@ -18,6 +18,9 @@ player.on('play', (event, title) => {
 )
 
 rtm.on('message', async event => {
+  if (event.hidden) {
+    return
+  }
   console.log(event)
   if (event.subtype || !(event.channel.startsWith('C') || event.channel.startsWith('D'))) {
     console.log('Invalid channel')
