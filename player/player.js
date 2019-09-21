@@ -21,6 +21,7 @@ class Player {
     this.events = {}
     this.history = []
     this.stopwatch = new Stopwatch()
+    this.trackWasSkipped = false
   }
 
   set volume(vol) {
@@ -60,16 +61,20 @@ class Player {
             .format('mp3')
             // @ts-ignore
             .outputOptions(this.ffmpegOutputOptions || [])
-          audio.on('error', error => {
-            streamError = error
-            reject({ error: error, url: url, info: info, queueItem: next })
-          })
+
           this.currentAudio = audio
           // @ts-ignore
           const speaker = new Speaker({
             channels: 2,
             bitDepth: 16,
             sampleRate: 48000
+          })
+
+          audio.on('error', error => {
+            streamError = error
+            console.log(`Audio played for ${~~(this.stopwatch.stop() / 1000)} seconds`)
+            speaker.close(true)
+            reject({ error: error, url: url, info: info, queueItem: next })
           })
 
           this.volumeTransform = new Volume(this.currentVolume)
@@ -132,6 +137,7 @@ class Player {
   }
 
   skip() {
+    this.trackWasSkipped = true
     this.currentAudio.kill('SIGTERM')
     this.currentlyPlaying.destroy()
     this.currentStream.destroy()
@@ -183,10 +189,15 @@ class Player {
     while (this.queued.length > 0) {
       this.isPlaying = true
       const playedTrack = await this.playNext().catch(error => {
-        console.error(
-          'Error while playing next, or track was skipped',
-          error.error
-        )
+        if (!this.trackWasSkipped) {
+          console.error(
+            'Error while playing next, or track was skipped',
+            error.error
+          )
+        } else {
+          console.log('Track skipped')
+          this.trackWasSkipped = false
+        }
         return error
       })
       if (this.queued.length === 0 && this.autoplay) {
