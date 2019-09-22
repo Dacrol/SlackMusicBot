@@ -71,7 +71,7 @@ class Player {
             try {
               await new Promise((_resolve, _reject) => {
                 console.log('Playing with video on localhost:9999')
-                const audio = ffmpeg(stream).format('mpegts').inputOptions(['-re']).outputOptions(['-codec:v mpeg1video', '-b:v 6000k', '-s 1920x1080', '-bf 0', '-codec:a mp2', '-b:a 128k', '-q 1', '-muxdelay 0.001'
+                const audio = ffmpeg(stream).format('mpegts').inputOptions(['-re']).outputOptions(['-codec:v mpeg1video', '-filter:v fps=fps=24', '-b:v 6000k', '-s 1920x1080', '-bf 0', '-codec:a mp2', '-b:a 128k', '-muxdelay 0.001', '-r 24'
                   ])
                   .output('http://localhost:9997/falloutbotinput')
                   audio.on('error', (error) => {

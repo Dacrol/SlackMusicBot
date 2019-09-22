@@ -40,8 +40,9 @@
         videoBufferSize: 6000 * 1024 * 5,
         audioBufferSize: 128 * 1024 * 5,
 				throttled: false,
-				chunkSize: 1024*1024*10,
+				chunkSize: 6000*1024*5,
 				onVideoDecode: () => {
+					console.log('chunk decoded')
 					if (!playing) {
 						playing = true
 						showCanvas()
