@@ -17,6 +17,17 @@ player.on('play', (event, title) => {
   }
 )
 
+player.on('playvideo', (event, title) => {
+  if (event && event.channel && title) {
+    const ip = getIP()
+      rtm.sendMessage(
+        `Now playing with video: ${title}${ip && (' (http://'+ ip +':9999)')}`,
+        event.channel
+      )
+    }
+  }
+)
+
 rtm.on('message', async event => {
   if (event.hidden) {
     return
@@ -27,7 +38,7 @@ rtm.on('message', async event => {
     return
   }
   const message = event.text
-  if (Player.isYoutube(message)) {
+  if (Player.isYoutube(message.split(' ')[0])) {
     try {
       player.queue(message, event)
       const reply = await rtm.sendMessage(
@@ -111,3 +122,18 @@ function testCommand(command, validCommands) {
     console.log(self, team)
   }, 5000)
 })()
+
+function getIP() {
+  const os = require('os')
+  const ifaces = os.networkInterfaces()
+
+  try {
+    const key = Object.keys(ifaces).find((key) => {
+      return key.startsWith('Ethernet') || key.startsWith('wlp')
+    })
+
+    return ifaces[key][1].address
+  } catch (error) {
+    return ''
+  }
+}
