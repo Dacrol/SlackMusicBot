@@ -9,6 +9,8 @@ const axios = require('axios').default
 const Stopwatch = require('@dacrol/stopwatch')
 const VideoServer = require('./video-server')
 
+const queueRegex = /(\S+)(?:\s(\S+))?/
+
 class Player {
   constructor() {
     this.queued = []
@@ -49,17 +51,48 @@ class Player {
       let info = {}
       try {
         let streamError = null
-        const stream = ytdl(url, {
+        const stream = !next.video ? ytdl(url, {
           highWaterMark: 2 ** 25,
           quality: 'highestaudio',
           filter: 'audioonly'
+        }) : ytdl(url, {
+          highWaterMark: 2 ** 25,
+          quality: 'highest',
+          // @ts-ignore
+          filter: 'audioandvideo'
         })
 
-        stream.on('info', (_info, format) => {
+        stream.on('info', async (_info, format) => {
           info = _info
-          this.fire('play', [next.event, info.title])
 
           this.currentStream = stream
+
+          if (next.video) {
+            try {
+              await new Promise((_resolve, _reject) => {
+                console.log('Playing with video on localhost:9999')
+                const audio = ffmpeg(stream).format('mpegts').inputOptions(['-re']).outputOptions(['-codec:v mpeg1video', '-s 1920x1080', '-b:v 7500k', '-bf 0', '-codec:a mp2', '-b:a 128k', '-q 1', '-muxdelay 0.001'
+                  ])
+                  .output('http://localhost:9997/falloutbotinput')
+                  audio.on('error', () => {
+                    _reject()
+                  })
+                  audio.on('end', () => {
+                    _resolve()
+                  })
+                  this.currentAudio = audio
+                  this.fire('playvideo', [next.event, info.title])
+                  audio.run()
+              })
+              resolve({ url: url, info: info, queueItem: next })
+              return
+            } catch (error) {
+              reject({ error: error, url: url, info: info, queueItem: next })
+              return
+            }
+          }
+
+          this.fire('play', [next.event, info.title])
 
           const audio = ffmpeg(stream)
             .format('mp3')
@@ -129,11 +162,16 @@ class Player {
     })
   }
 
-  queue(url, event) {
+  queue(message, event) {
+    const parts = queueRegex.exec(message)
+    const [url, param] = parts.slice(1,3)
+    if (param === 'v' || param === 'video') {
+      var video = true
+    }
     if (!Player.isYoutube(url)) {
       throw new Error('Not a valid YouTube ID/URL')
     }
-    this.queued.push({ url: url, event: event })
+    this.queued.push({ url: url, event: event, video: video })
     if (!this.isPlaying) {
       this.playQueue().catch(error => {
         console.error(error)
@@ -144,8 +182,14 @@ class Player {
   skip() {
     this.trackWasSkipped = true
     this.currentAudio.kill('SIGTERM')
-    this.currentlyPlaying.destroy()
-    this.currentStream.destroy()
+    if (this.currentlyPlaying) {
+      this.currentlyPlaying.destroy()
+      this.currentlyPlaying = null
+    }
+    if (this.currentStream) {
+      this.currentStream.destroy()
+      this.curentStream = null
+    }
   }
 
   playNext() {
