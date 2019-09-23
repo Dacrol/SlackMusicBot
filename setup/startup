@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-pulseaudio -D
+pulseaudio -k ; sleep 5 ; pulseaudio -D
 # pacmd set-default-sink Mkchromecast
 sudo modprobe snd-aloop
 pactl load-module module-loopback
