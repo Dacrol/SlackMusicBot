@@ -15,7 +15,7 @@ class Player {
   constructor() {
     this.queued = []
     this.isPlaying = false
-    this.currentVolume = 1
+    this.currentVolume = 0.5
     this.volumeTransform = null
     this.currentlyPlaying = null
     this.currentAudio = null
