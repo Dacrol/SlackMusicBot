@@ -28,6 +28,10 @@ class Player {
     const {server, relay} = VideoServer()
     this.server = server
     this.relay = relay
+    this.ffmpegOutputOptions = [
+      '-af aresample=48000',
+      '-ac 2'
+    ]
   }
 
   set volume(vol) {
