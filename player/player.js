@@ -68,6 +68,7 @@ class Player {
 
         stream.on('info', async (_info, format) => {
           info = _info
+          next.info = _info
 
           this.currentStream = stream
 
