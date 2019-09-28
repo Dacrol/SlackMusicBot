@@ -90,6 +90,17 @@ function handleCommand(message, { event = {} } = {}) {
   }
 
   if (
+    testCommand(command, ['repeat']) &&
+    (args.trim() !== '' && isFinite(+args))
+  ) {
+    player.repeat = args
+    rtm.sendMessage(
+      `Repeating ${player.isPlaying ? 'current' : 'next'} track ${args} times`,
+      event.channel
+    )
+  }
+
+  if (
     testCommand(command, ['vol', 'volume']) &&
     (args.trim() !== '' && isFinite(+args))
   ) {

@@ -32,6 +32,7 @@ class Player {
       '-af aresample=48000',
       '-ac 2'
     ]
+    this.repeat = 0
   }
 
   set volume(vol) {
@@ -204,6 +205,16 @@ class Player {
     })
   }
 
+  repeatLast() {
+    if (!this.history[0]) {
+      return
+    }
+    const next = this.history[0]
+    return this.play(next).finally(() => {
+      this.addToHistory(next)
+    })
+  }
+
   addToHistory(track) {
     this.history.unshift(track)
   }
@@ -240,7 +251,7 @@ class Player {
   }
 
   async playQueue() {
-    while (this.queued.length > 0) {
+    while (this.queued.length > 0 || this.repeat > 0) {
       this.isPlaying = true
       const playedTrack = await this.playNext().catch(error => {
         if (!this.trackWasSkipped) {
@@ -254,6 +265,10 @@ class Player {
         }
         return error
       })
+      while (this.repeat > 0 && this.history.length > 0) {
+        this.repeat--
+        await this.repeatLast()
+      }
       if (this.queued.length === 0 && this.autoplay) {
         try {
           let info = playedTrack.info
@@ -321,6 +336,7 @@ class Player {
 }
 
 module.exports = Player
+
 if (process.argv[2]) {
   const player = new Player()
   player.play(process.argv[2]).then(() => {
