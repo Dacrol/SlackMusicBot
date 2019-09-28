@@ -266,12 +266,26 @@ class Player {
               console.error(error)
             }
           }
-          const nextTrack = await this.getAutoplayTrack(info).catch(error => {
+          let nextTrack = await this.getAutoplayTrack(info).catch(error => {
             return {
               id: info.related_videos[0].id,
               title: info.related_videos[0].title
             }
           })
+          const lastTenTracks = this.history.slice(0,10)
+          if (lastTenTracks.some(track => {
+            return track.info.video_id == nextTrack.id
+          })) {
+            const replacement = playedTrack.info.related_videos.find(video => {
+              return !lastTenTracks.some(track => {
+                return track.info.video_id == video.id
+              })
+            })
+            nextTrack = {
+              id: replacement.id,
+              title: replacement.title
+            }
+          }
           this.queue(nextTrack.id, playedTrack.queueItem.event)
           console.log('Queued: ' + nextTrack.title)
         } catch (error) {
