@@ -205,7 +205,7 @@ class Player {
   }
 
   addToHistory(track) {
-    this.history.push(track)
+    this.history.unshift(track)
   }
 
   async getAutoplayTrack(info) {
