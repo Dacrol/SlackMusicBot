@@ -11,31 +11,29 @@ const rtm = new RTMClient(token)
 
 player.on('play', (event, title) => {
   if (event && event.channel && title) {
-      rtm.sendMessage(
-        `Now playing: ${title}`,
-        event.channel
-      )
-    }
+    rtm.sendMessage(`Now playing: ${title}`, event.channel)
   }
-)
+})
 
 player.on('playvideo', (event, title) => {
   if (event && event.channel && title) {
     const ip = getIP()
-      rtm.sendMessage(
-        `Now playing with video: ${title}${ip && (' (http://'+ ip +':9999)')}`,
-        event.channel
-      )
-    }
+    rtm.sendMessage(
+      `Now playing with video: ${title}${ip && ' (http://' + ip + ':9999)'}`,
+      event.channel
+    )
   }
-)
+})
 
 rtm.on('message', async event => {
   if (event.hidden) {
     return
   }
   console.log(event)
-  if (event.subtype || !(event.channel.startsWith('C') || event.channel.startsWith('D'))) {
+  if (
+    event.subtype ||
+    !(event.channel.startsWith('C') || event.channel.startsWith('D'))
+  ) {
     console.log('Invalid channel')
     return
   }
@@ -70,14 +68,10 @@ function handleCommand(message, { event = {} } = {}) {
     if (!player.isPlaying) {
       return true
     }
-    rtm.sendMessage(
-      `Track skipped`,
-      event.channel
-    )
+    rtm.sendMessage(`Track skipped`, event.channel)
     player.skip()
-    return true 
+    return true
   }
-
 
   if (testCommand(command, ['autoplay'])) {
     const autoplay = player.toggleAutoplay(args)
@@ -88,21 +82,13 @@ function handleCommand(message, { event = {} } = {}) {
     return true
   }
 
-    if (
-    testCommand(command, ['vol', 'volume']) 
-  ) {
+  if (testCommand(command, ['vol', 'volume'])) {
     if (args.trim() !== '' && isFinite(+args)) {
-    player.volume = args
-    rtm.sendMessage(
-      `Volume set to ${player.volume}%`,
-      event.channel
-    )
-  } else {
-    rtm.sendMessage(
-      `Volume is ${player.volume}%`,
-      event.channel
-    )
-  }
+      player.volume = args
+      rtm.sendMessage(`Volume set to ${player.volume}%`, event.channel)
+    } else {
+      rtm.sendMessage(`Volume is ${player.volume}%`, event.channel)
+    }
     return true
   }
 
@@ -122,8 +108,6 @@ function handleCommand(message, { event = {} } = {}) {
       event.channel
     )
   }
-
-
 }
 
 /**
@@ -150,7 +134,7 @@ function testCommand(command, validCommands) {
 
 function getIP() {
   try {
-    const key = Object.keys(ifaces).find((key) => {
+    const key = Object.keys(ifaces).find(key => {
       return key.startsWith('Ethernet') || key.startsWith('wlp')
     })
     return ifaces[key][1].address
