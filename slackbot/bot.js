@@ -12,6 +12,8 @@ const botToken = process.env.SLACK_BOT_TOKEN
 const rtm = new RTMClient(botToken)
 const webClient = new WebClient(botToken)
 
+let searchLimit = 5
+
 player.on('play', (event, title) => {
   if (event && event.channel && title) {
     rtm.sendMessage(`Now playing: ${title}`, event.channel)
@@ -82,7 +84,7 @@ async function setQueueTimer(event, target, callback) {
 }
 
 async function searchAndQueue(message, event) {
-  const info = await getInfo(message, ['--default-search=ytsearch5', '-i'], true)
+  const info = await getInfo(message, ['--default-search=ytsearch' + searchLimit, '-i'], true)
   try {
     let index = 0
     let target = info.items[index]
@@ -172,6 +174,29 @@ function handleCommand(message, { event = {} } = {}) {
 
   if (!args) {
     return false
+  }
+
+  if (
+    testCommand(command, ['set'])
+  ) {
+    const argParts = args.split(' ')
+    if (!(argParts.length > 1)) {
+      return true
+    }
+    if (argParts[0] === 'searchlimit' && isFinite(+argParts[1])) {
+      searchLimit = +argParts[1]
+      rtm.sendMessage(`Search limit set to ${searchLimit}`, event.channel)
+    }
+    return true
+  }
+
+  if (
+    testCommand(command, ['get'])
+  ) {
+    if (args === 'searchlimit') {
+      rtm.sendMessage(`Search limit is ${searchLimit}`, event.channel)
+    }
+    return true
   }
 
   if (
