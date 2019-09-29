@@ -4,7 +4,6 @@ const Speaker = require('speaker')
 const ytdl = require('ytdl-core')
 const ffmpeg = require('fluent-ffmpeg')
 const Volume = require('pcm-volume')
-const { getInfo } = require('ytdl-getinfo')
 const axios = require('axios').default
 const Stopwatch = require('@dacrol/stopwatch')
 const VideoServer = require('./video-server')

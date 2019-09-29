@@ -2,6 +2,7 @@ require('dotenv').config()
 const os = require('os')
 const ifaces = os.networkInterfaces()
 const { RTMClient } = require('@slack/rtm-api')
+const { getInfo } = require('ytdl-getinfo')
 const Player = require('../player/player')
 const player = new Player()
 
@@ -49,9 +50,26 @@ rtm.on('message', async event => {
       console.warn(error)
     }
   } else {
-    handleCommand(message, { event: event })
+    const commandHandled = handleCommand(message, { event: event })
+    if (!commandHandled) {
+      searchAndQueue(message, event)
+    }
   }
 })
+
+async function searchAndQueue(message, event) {
+  const info = await getInfo(message, ['--default-search=ytsearch', '-i'], true)
+  try {
+    let target = info.items[0]
+    player.queue(target.id, event)
+    const reply = await rtm.sendMessage(
+      `Found and queued ${target.title}`,
+      event.channel
+    )
+  } catch (error) {
+    console.warn(error)
+  }
+}
 
 function handleCommand(message, { event = {} } = {}) {
   let [command, args] = message.split(/\s(.+)/)
