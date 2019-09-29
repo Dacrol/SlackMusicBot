@@ -1,4 +1,6 @@
 require('dotenv').config()
+const os = require('os')
+const ifaces = os.networkInterfaces()
 const { RTMClient } = require('@slack/rtm-api')
 const Player = require('../player/player')
 const player = new Player()
@@ -56,22 +58,24 @@ rtm.on('message', async event => {
 function handleCommand(message, { event = {} } = {}) {
   let [command, args] = message.split(/\s(.+)/)
   if (!command) {
-    return
+    return false
   }
 
   if (testCommand(command, ['stop', 'stfu'])) {
     player.stop()
+    return true
   }
 
   if (testCommand(command, ['skip'])) {
     if (!player.isPlaying) {
-      return
+      return true
     }
     rtm.sendMessage(
       `Track skipped`,
       event.channel
     )
     player.skip()
+    return true 
   }
 
 
@@ -81,12 +85,13 @@ function handleCommand(message, { event = {} } = {}) {
       `Autoplay ${autoplay ? 'enabled' : 'disabled'}`,
       event.channel
     )
+    return true
   }
   
   /* Put commands that require args below */
 
   if (!args) {
-    return
+    return false
   }
 
   if (
@@ -109,6 +114,7 @@ function handleCommand(message, { event = {} } = {}) {
       `Volume set`,
       event.channel
     )
+    return true
   }
 }
 
@@ -135,14 +141,10 @@ function testCommand(command, validCommands) {
 })()
 
 function getIP() {
-  const os = require('os')
-  const ifaces = os.networkInterfaces()
-
   try {
     const key = Object.keys(ifaces).find((key) => {
       return key.startsWith('Ethernet') || key.startsWith('wlp')
     })
-
     return ifaces[key][1].address
   } catch (error) {
     return ''
