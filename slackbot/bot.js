@@ -107,6 +107,7 @@ function handleCommand(message, { event = {} } = {}) {
       `Repeating ${player.isPlaying ? 'current' : 'next'} track ${args} times`,
       event.channel
     )
+    return true
   }
 }
 
