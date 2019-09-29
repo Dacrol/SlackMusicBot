@@ -45,6 +45,10 @@ class Player {
     }
   }
 
+  get volume() {
+    return this.currentVolume
+  }
+
   play(next) {
     return new Promise(async (resolve, reject) => {
       const url = next.url

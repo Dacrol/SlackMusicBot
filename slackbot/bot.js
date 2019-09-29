@@ -101,11 +101,11 @@ function handleCommand(message, { event = {} } = {}) {
   }
 
   if (testCommand(command, ['vol', 'volume'])) {
-    if (args.trim() !== '' && isFinite(+args)) {
+    if (args && args.trim() !== '' && isFinite(+args)) {
       player.volume = args
-      rtm.sendMessage(`Volume set to ${player.volume}%`, event.channel)
+      rtm.sendMessage(`Volume set to ${player.volume * 100}%`, event.channel)
     } else {
-      rtm.sendMessage(`Volume is ${player.volume}%`, event.channel)
+      rtm.sendMessage(`Volume is ${player.volume * 100}%`, event.channel)
     }
     return true
   }
