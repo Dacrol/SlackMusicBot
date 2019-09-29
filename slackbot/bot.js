@@ -87,7 +87,25 @@ function handleCommand(message, { event = {} } = {}) {
     )
     return true
   }
-  
+
+    if (
+    testCommand(command, ['vol', 'volume']) 
+  ) {
+    if (args.trim() !== '' && isFinite(+args)) {
+    player.volume = args
+    rtm.sendMessage(
+      `Volume set to ${player.volume}%`,
+      event.channel
+    )
+  } else {
+    rtm.sendMessage(
+      `Volume is ${player.volume}%`,
+      event.channel
+    )
+  }
+    return true
+  }
+
   /* Put commands that require args below */
 
   if (!args) {
@@ -105,17 +123,7 @@ function handleCommand(message, { event = {} } = {}) {
     )
   }
 
-  if (
-    testCommand(command, ['vol', 'volume']) &&
-    (args.trim() !== '' && isFinite(+args))
-  ) {
-    player.volume = args
-    rtm.sendMessage(
-      `Volume set`,
-      event.channel
-    )
-    return true
-  }
+
 }
 
 /**
