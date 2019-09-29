@@ -78,7 +78,7 @@ async function setQueueTimer(event, target, callback) {
   }
   let timeout = setTimeout(timeoutFunction, 10000);
   await webClient.reactions.add({name: 'x', channel: event.channel, timestamp: reply.ts})
-  await webClient.reactions.add({name: 'arrow_forward', channel: event.channel, timestamp: reply.ts})
+  await webClient.reactions.add({name: 'ok_hand', channel: event.channel, timestamp: reply.ts})
   await webClient.reactions.add({name: 'fast_forward', channel: event.channel, timestamp: reply.ts})
   return { timeout, reply, timeoutFunction }
 }
@@ -113,7 +113,7 @@ async function searchAndQueue(message, event) {
         cleanUp()
         return
       }
-      if (_event.reaction === 'arrow_forward') {
+      if (_event.reaction === 'ok_hand') {
         clearTimeout(timeout)
         timeoutFunction()
         return
