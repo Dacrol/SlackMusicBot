@@ -2,13 +2,15 @@ require('dotenv').config()
 const os = require('os')
 const ifaces = os.networkInterfaces()
 const { RTMClient } = require('@slack/rtm-api')
+const { WebClient } = require('@slack/web-api')
 const { getInfo } = require('ytdl-getinfo')
 const Player = require('../player/player')
 const player = new Player()
 
-const token = process.env.SLACK_BOT_TOKEN
+const botToken = process.env.SLACK_BOT_TOKEN
 
-const rtm = new RTMClient(token)
+const rtm = new RTMClient(botToken)
+const webClient = new WebClient(botToken)
 
 player.on('play', (event, title) => {
   if (event && event.channel && title) {
@@ -57,15 +59,71 @@ rtm.on('message', async event => {
   }
 })
 
-async function searchAndQueue(message, event) {
-  const info = await getInfo(message, ['--default-search=ytsearch', '-i'], true)
-  try {
-    let target = info.items[0]
+
+async function setQueueTimer(event, target, callback) {
+  let reply = await rtm.sendMessage(
+    `Queuing ${target.title} in 10 seconds`,
+    event.channel
+  )
+  const timeoutFunction = () => {
     player.queue(target.id, event)
-    const reply = await rtm.sendMessage(
-      `Found and queued ${target.title}`,
+    webClient.chat.delete({channel: event.channel, ts: reply.ts})
+    rtm.sendMessage(
+      `Queued ${target.title}`,
       event.channel
     )
+    callback()
+  }
+  let timeout = setTimeout(timeoutFunction, 10000);
+  await webClient.reactions.add({name: 'x', channel: event.channel, timestamp: reply.ts})
+  await webClient.reactions.add({name: 'arrow_forward', channel: event.channel, timestamp: reply.ts})
+  await webClient.reactions.add({name: 'fast_forward', channel: event.channel, timestamp: reply.ts})
+  return { timeout, reply, timeoutFunction }
+}
+
+async function searchAndQueue(message, event) {
+  const info = await getInfo(message, ['--default-search=ytsearch5', '-i'], true)
+  try {
+    let index = 0
+    let target = info.items[index]
+    let handleReaction = async _event => {
+      if (_event.user == rtm.activeUserId) {
+        return
+      }
+      if (_event.reaction === 'fast_forward') {
+        clearTimeout(timeout)
+        index++
+        webClient.chat.delete({channel: event.channel, ts: reply.ts})
+        if (index >= info.items.length) {
+          cleanUp()
+          return
+        }
+        target = info.items[index]
+        const newVars = await setQueueTimer(event, target, cleanUp)
+        timeout = newVars.timeout
+        reply = newVars.reply
+        timeoutFunction = newVars.timeoutFunction
+        return
+      }
+      if (_event.reaction === 'x') {
+        clearTimeout(timeout)
+        webClient.chat.delete({channel: event.channel, ts: reply.ts})
+        cleanUp()
+        return
+      }
+      if (_event.reaction === 'arrow_forward') {
+        clearTimeout(timeout)
+        timeoutFunction()
+        return
+      }
+    }
+    var cleanUp = () => {
+      rtm.off('reaction_added', handleReaction)
+      rtm.off('reaction_removed', handleReaction)
+    }
+    var { timeout, reply, timeoutFunction } = await setQueueTimer(event, target, cleanUp)
+    rtm.on('reaction_added', handleReaction)
+    rtm.on('reaction_removed', handleReaction)
   } catch (error) {
     console.warn(error)
   }
