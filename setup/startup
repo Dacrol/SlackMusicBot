@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 pulseaudio -k ; sleep 5 ; pulseaudio -D
 # pacmd set-default-sink Mkchromecast
