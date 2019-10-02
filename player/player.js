@@ -7,6 +7,9 @@ const Volume = require('pcm-volume')
 const axios = require('axios').default
 const Stopwatch = require('@dacrol/stopwatch')
 const VideoServer = require('./video-server')
+const { exec: _exec } = require('child_process')
+const { promisify } = require('util')
+const exec = promisify(_exec)
 
 const queueRegex = /(\S+)(?:\s(\S+))?/
 
@@ -256,6 +259,9 @@ class Player {
   async playQueue() {
     while (this.queued.length > 0 || this.repeat > 0) {
       this.isPlaying = true
+      exec('pactl unload-module module-loopback').catch(() => {
+        console.warn('pactl unload-module module-loopback failed')
+      })
       const playedTrack = await this.playNext().catch(error => {
         if (!this.trackWasSkipped) {
           console.error(
@@ -311,6 +317,9 @@ class Player {
         }
       }
     }
+    exec('pactl load-module module-loopback').catch(() => {
+      console.warn('pactl load-module module-loopback failed')
+    })
     this.isPlaying = false
   }
 
