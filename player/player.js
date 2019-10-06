@@ -32,7 +32,8 @@ class Player {
     this.relay = relay
     this.ffmpegOutputOptions = [
       '-af aresample=48000',
-      '-ac 2'
+      '-ac 2',
+      '-af bass=g=6'
     ]
     this.repeat = 0
   }

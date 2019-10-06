@@ -187,6 +187,10 @@ function handleCommand(message, { event = {} } = {}) {
       searchLimit = +argParts[1]
       rtm.sendMessage(`Search limit set to ${searchLimit}`, event.channel)
     }
+    if (argParts[0] === 'bassboost' && isFinite(+argParts[1])) {
+      player.ffmpegOutputOptions[2] = '-af bass=g=' + argParts[1]
+      rtm.sendMessage(`Bass boost set to ${player.ffmpegOutputOptions[2].replace('-af bass=g=', '')} (recommended values between -15 and 15)`, event.channel)
+    }
     return true
   }
 
@@ -195,6 +199,9 @@ function handleCommand(message, { event = {} } = {}) {
   ) {
     if (args === 'searchlimit') {
       rtm.sendMessage(`Search limit is ${searchLimit}`, event.channel)
+    }
+    if (args === 'bassboost') {
+      rtm.sendMessage(`Bass boost is ${player.ffmpegOutputOptions[2].replace('-af bass=g=', '')}`, event.channel)
     }
     return true
   }
