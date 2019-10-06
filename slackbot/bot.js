@@ -13,6 +13,7 @@ const rtm = new RTMClient(botToken)
 const webClient = new WebClient(botToken)
 
 let searchLimit = 5
+let searchTime = 15
 
 player.on('play', (event, title) => {
   if (event && event.channel && title) {
@@ -64,7 +65,7 @@ rtm.on('message', async event => {
 
 async function setQueueTimer(event, target, callback) {
   let reply = await rtm.sendMessage(
-    `Queuing ${target.title} in 15 seconds`,
+    `Queuing ${target.title} in ${searchTime} seconds`,
     event.channel
   )
   const timeoutFunction = () => {
@@ -76,7 +77,7 @@ async function setQueueTimer(event, target, callback) {
     )
     callback()
   }
-  let timeout = setTimeout(timeoutFunction, 15000);
+  let timeout = setTimeout(timeoutFunction, searchTime * 1000);
   await webClient.reactions.add({name: 'x', channel: event.channel, timestamp: reply.ts})
   await webClient.reactions.add({name: 'ok_hand', channel: event.channel, timestamp: reply.ts})
   await webClient.reactions.add({name: 'fast_forward', channel: event.channel, timestamp: reply.ts})
@@ -187,6 +188,10 @@ function handleCommand(message, { event = {} } = {}) {
       searchLimit = +argParts[1]
       rtm.sendMessage(`Search limit set to ${searchLimit}`, event.channel)
     }
+    if (argParts[0] === 'searchtime' && isFinite(+argParts[1])) {
+      searchTime = +argParts[1]
+      rtm.sendMessage(`Search time set to ${searchTime} seconds`, event.channel)
+    }
     if (argParts[0] === 'bassboost' && isFinite(+argParts[1])) {
       player.ffmpegOutputOptions[2] = '-af bass=g=' + argParts[1]
       rtm.sendMessage(`Bass boost set to ${player.ffmpegOutputOptions[2].replace('-af bass=g=', '')} (recommended values between -15 and 15)`, event.channel)
@@ -199,6 +204,9 @@ function handleCommand(message, { event = {} } = {}) {
   ) {
     if (args === 'searchlimit') {
       rtm.sendMessage(`Search limit is ${searchLimit}`, event.channel)
+    }
+    if (args === 'searchtime') {
+      rtm.sendMessage(`Search time is ${searchTime} seconds`, event.channel)
     }
     if (args === 'bassboost') {
       rtm.sendMessage(`Bass boost is ${player.ffmpegOutputOptions[2].replace('-af bass=g=', '')}`, event.channel)
