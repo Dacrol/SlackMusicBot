@@ -64,7 +64,7 @@ rtm.on('message', async event => {
 
 async function setQueueTimer(event, target, callback) {
   let reply = await rtm.sendMessage(
-    `Queuing ${target.title} in 10 seconds`,
+    `Queuing ${target.title} in 15 seconds`,
     event.channel
   )
   const timeoutFunction = () => {
@@ -76,7 +76,7 @@ async function setQueueTimer(event, target, callback) {
     )
     callback()
   }
-  let timeout = setTimeout(timeoutFunction, 10000);
+  let timeout = setTimeout(timeoutFunction, 15000);
   await webClient.reactions.add({name: 'x', channel: event.channel, timestamp: reply.ts})
   await webClient.reactions.add({name: 'ok_hand', channel: event.channel, timestamp: reply.ts})
   await webClient.reactions.add({name: 'fast_forward', channel: event.channel, timestamp: reply.ts})
