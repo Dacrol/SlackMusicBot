@@ -33,7 +33,7 @@ class Player {
     this.ffmpegOutputOptions = [
       '-af aresample=48000',
       '-ac 2',
-      '-af bass=g=6'
+      '-af bass=g=0'
     ]
     this.repeat = 0
   }
