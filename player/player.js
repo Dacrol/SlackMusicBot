@@ -327,6 +327,7 @@ class Player {
   stop() {
     this.queued = []
     this.autoplay = false
+    this.repeat = 0
     if (this.isPlaying) {
       this.skip()
     }
