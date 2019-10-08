@@ -161,11 +161,25 @@ function handleCommand(message, { event = {} } = {}) {
     return true
   }
 
-  if (testCommand(command, ['vol', 'volume'])) {
+  const volumeRegex = /(\d+)\s?%/
+  if (testCommand(command, ['vol', 'volume']) || volumeRegex.test(message)) {
     if (args && args.trim() !== '' && isFinite(+args)) {
       player.volume = args
       rtm.sendMessage(`Volume set to ${Math.round(player.volume * 100)}%`, event.channel)
-    } else {
+    } 
+    else if (volumeRegex.test(message)) {
+      try {
+        player.volume = volumeRegex.exec(message)[1]
+      } catch (error) {}
+      rtm.sendMessage(`Volume set to ${Math.round(player.volume * 100)}%`, event.channel)
+    }
+    else if (volumeRegex.test(args)) {
+      try {
+        player.volume = volumeRegex.exec(args)[1]
+      } catch (error) {}
+      rtm.sendMessage(`Volume set to ${Math.round(player.volume * 100)}%`, event.channel)
+    }
+    else {
       rtm.sendMessage(`Volume is ${Math.round(player.volume * 100)}%`, event.channel)
     }
     return true
