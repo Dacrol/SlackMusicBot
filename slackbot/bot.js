@@ -85,6 +85,17 @@ async function setQueueTimer(event, target, callback) {
 }
 
 async function searchAndQueue(message, event) {
+  if (message.startsWith('!')) {
+    const searchTerm = message.replace('!', '')
+    const info = await getInfo(searchTerm, ['--default-search=ytsearch', '-i'], true)
+    const target = info.items[0]
+    player.queue(target.id, event)
+    rtm.sendMessage(
+      `Queued ${target.title}`,
+      event.channel
+    )
+    return
+  }
   const info = await getInfo(message, ['--default-search=ytsearch' + searchLimit, '-i'], true)
   try {
     let index = 0
