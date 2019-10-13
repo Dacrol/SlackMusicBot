@@ -107,10 +107,25 @@ class Player {
 
           this.fire('play', [next.event, info.title])
 
+          const outputOptions = this.ffmpegOutputOptions ? this.ffmpegOutputOptions.reduce((acc, option) => {
+            const previousOptionIndex = acc.findIndex(_option => {
+              return _option.startsWith(option.substring(0, option.indexOf(' ')))
+            })
+            if (previousOptionIndex > -1) {
+              let previousOption = acc[previousOptionIndex]
+                previousOption = previousOption.substring(0, previousOption.length) + ',' + option.substring(option.indexOf(' ') + 1)
+                acc[previousOptionIndex] = previousOption
+            } else {
+              acc.push(option)
+            }
+            return acc
+          }, []) : []
+
           const audio = ffmpeg(stream)
             .format('mp3')
             // @ts-ignore
-            .outputOptions(this.ffmpegOutputOptions || [])
+            .outputOptions(outputOptions)
+          // console.log(outputOptions, this.ffmpegOutputOptions)
 
           this.currentAudio = audio
           // @ts-ignore
