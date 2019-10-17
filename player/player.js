@@ -294,7 +294,7 @@ class Player {
         this.repeat--
         await this.repeatLast()
       }
-      if (this.queued.length === 0 && this.autoplay) {
+      if (this.queued.length === 0 && this.autoplay && this.isPlaying) {
         try {
           let info = playedTrack.info
           if (
@@ -341,10 +341,10 @@ class Player {
 
   stop() {
     this.queued = []
-    this.autoplay = false
     this.repeat = 0
     if (this.isPlaying) {
       this.skip()
+      this.isPlaying = false
     }
   }
 
