@@ -15,6 +15,8 @@ const webClient = new WebClient(botToken)
 let searchLimit = 5
 let searchTime = 15
 
+let lastRealChannel = ''
+
 player.on('play', (event, title) => {
   if (event && event.channel && title) {
     rtm.sendMessage(`Now playing: ${title}`, event.channel)
@@ -42,10 +44,15 @@ rtm.on('message', async event => {
   ) {
     console.log('Invalid channel')
     return
+  } else if (event.channel.startsWith('C') || lastRealChannel.startsWith('C')) {
+    lastRealChannel = event.channel
   }
   const message = event.text
   if (Player.isYoutube(message.split(' ')[0])) {
     try {
+      if (event.channel.startsWith('D')) {
+        event.channel = lastRealChannel
+      }
       player.queue(message, event)
       const reply = await rtm.sendMessage(
         `Song queued, <@${event.user}>`,
