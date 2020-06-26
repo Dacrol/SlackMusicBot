@@ -139,7 +139,13 @@ class Player {
             streamError = error
             // @ts-ignore
             console.log(`Audio played for ${~~(this.stopwatch.stop() / 1000)} seconds`)
-            speaker.close(true)
+            try {
+              speaker.close(true)
+              console.log('Speaker closed successfully')
+            } catch (error) {
+              console.log('Speaker closed with errors:')
+              console.trace(error)
+            }
             reject({ error: error, url: url, info: info, queueItem: next })
           })
 
