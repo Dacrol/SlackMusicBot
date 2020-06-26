@@ -40,11 +40,11 @@ rtm.on('message', async event => {
   console.log(event)
   if (
     event.subtype ||
-    !(event.channel.startsWith('C') || event.channel.startsWith('D'))
+    !(event.channel.startsWith('C') || event.channel.startsWith('D') || event.channel.startsWith('G'))
   ) {
     console.log('Invalid channel')
     return
-  } else if (event.channel.startsWith('C') || lastRealChannel.startsWith('C')) {
+  } else if (event.channel.startsWith('C') || lastRealChannel.startsWith('C') || lastRealChannel.startsWith('G')) {
     lastRealChannel = event.channel
   }
   const message = event.text
