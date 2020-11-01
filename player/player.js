@@ -94,7 +94,7 @@ class Player {
                     _resolve()
                   })
                   this.currentAudio = audio
-                  this.fire('playvideo', [next.event, info.title])
+                  this.fire('playvideo', [next.event, info])
                   audio.run()
               })
               resolve({ url: url, info: info, queueItem: next })
@@ -105,7 +105,7 @@ class Player {
             }
           }
 
-          this.fire('play', [next.event, info.title])
+          this.fire('play', [next.event, info])
 
           const outputOptions = this.ffmpegOutputOptions ? this.ffmpegOutputOptions.reduce((acc, option) => {
             const previousOptionIndex = acc.findIndex(_option => {

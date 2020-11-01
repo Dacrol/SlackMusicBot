@@ -17,13 +17,28 @@ let searchTime = 15
 
 let lastRealChannel = ''
 
-player.on('play', (event, title) => {
+player.on('play', (event, info) => {
+  if (info && info.videoDetails && info.videoDetails.title) {
+    var title = info.videoDetails.title
+  } else {
+    console.error(info)
+    throw new Error('No title found!')
+  }
   if (event && event.channel && title) {
     rtm.sendMessage(`Now playing: ${title}`, event.channel)
   }
+  else {
+    console.warn('Could not determine channel to send play message in: ', event)
+  }
 })
 
-player.on('playvideo', (event, title) => {
+player.on('playvideo', (event, info) => {
+  if (info && info.videoDetails && info.videoDetails.title) {
+    var title = info.videoDetails.title
+  } else {
+    console.error(info)
+    throw new Error('No title found!')
+  }
   if (event && event.channel && title) {
     const ip = getIP()
     rtm.sendMessage(
