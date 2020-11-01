@@ -11,3 +11,4 @@
 * Finish Dockerizing
 * User playlists 
 * Show current queue, volume, etc
+* Top 10
