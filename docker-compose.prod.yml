@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+
+  player:
+    image: orestadlinux/slackmusicbot:latest
+    user: 'node'
+    working_dir: /home/node/app
+    devices:
+      - /dev/snd/:/dev/snd/
+    ports:
+      - '13001:13001'
+    restart: 'unless-stopped'
